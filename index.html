@@ -106,44 +106,71 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Raleway',sans-seri
 </style>
 </head>
 <body>
-<audio id="bgMusic" loop preload="auto" style="display:none">
+<audio id="bgMusic" autoplay muted loop preload="auto" style="display:none">
   <source src="music.mp3" type="audio/mpeg">
 </audio>
-<video id="silentVid" autoplay muted playsinline loop style="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none">
-  <source src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAs1tZGF0AAACrQYF//+p3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE2MyByMzA2MCA1ZGI2YWE2IC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAyMSAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTEgc2NlbmVjdXQ9NDAgaW50cmFfcmVmcmVzaD0wIHJjX2xvb2thaGVhZD00MCByYz1jcmYgbWJ0cmVlPTEgY3JmPTIzLjAgcWNvbXA9MC42MCBxcG1pbj0wIHFwbWF4PTY5IHFwc3RlcD00IGlwX3JhdGlvPTEuNDAgYXE9MToxLjAwAIAAAAAQZYiEABX//vfJ78Cm69vfgQAAAxdtb292AAAAbG12aGQAAAAAAAAAAAAAAAAAAAPoAAAD6AABAAABAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACQXRyYWsAAABcdGtoZAAAAAMAAAAAAAAAAAAAAAEAAAAAAAAD6AAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAgAAAAIAAAAAACRlZHRzAAAAHGVsc3QAAAAAAAAAAQAAA+gAAAAAAAEAAAAAAbltZGlhAAAAIG1kaGQAAAAAAAAAAAAAAAAAAEAAAABAAFXEAAAAAAAtaGRscgAAAAAAAAAAdmlkZQAAAAAAAAAAAAAAAFZpZGVvSGFuZGxlcgAAAAFkbWluZgAAABR2bWhkAAAAAQAAAAAAAAAAAAAAJGRpbmYAAAAcZHJlZgAAAAAAAAABAAAADHVybCAAAAABAAABJHN0YmwAAADAc3RzZAAAAAAAAAABAAAAsGF2YzEAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAgACAEgAAABIAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY//8AAAA2YXZjQwFkAAr/4QAZZ2QACqzZX4iIwEQAAAMABAAAAwAIPEiWWAEABmjr48siwP34+AAAAAAQcGFzcAAAAAEAAAABAAAAFGJ0cnQAAAAAAAAWKAAAFigAAAAYc3R0cwAAAAAAAAABAAAAAQAAQAAAAAAcc3RzYwAAAAAAAAABAAAAAQAAAAEAAAABAAAAFHN0c3oAAAAAAAACxQAAAAEAAAAUc3RjbwAAAAAAAAABAAAAMAAAAGJ1ZHRhAAAAWm1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAG1kaXJhcHBsAAAAAAAAAAAAAAAALWlsc3QAAAAlqXRvbwAAAB1kYXRhAAAAAQAAAABMYXZmNTguNzYuMTAw" type="video/mp4">
-</video>
+
+<button id="muteBtn" onclick="toggleMute()" title="Activer la musique">
+  🔇
+</button>
+
+<style>
+#muteBtn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  background: rgba(245,239,230,0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(245,239,230,0.3);
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  animation: fadeInBtn 2s ease forwards;
+  opacity: 0;
+}
+#muteBtn:hover {
+  background: rgba(245,239,230,0.3);
+  transform: scale(1.1);
+}
+@keyframes fadeInBtn {
+  0%   { opacity: 0; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+</style>
+
 <script>
-(function(){
-  var audio = document.getElementById('bgMusic');
-  var vid = document.getElementById('silentVid');
+var muted = true;
+var audio = document.getElementById('bgMusic');
 
-  function startMusic(){
-    audio.volume = 0.8;
-    audio.play().then(function(){
-      vid.remove();
-    }).catch(function(){});
+function toggleMute() {
+  var btn = document.getElementById('muteBtn');
+  if (muted) {
+    audio.muted = false;
+    audio.volume = 0;
+    var v = 0;
+    var t = setInterval(function(){
+      v += 0.05; if(v >= 0.8){ v = 0.8; clearInterval(t); } audio.volume = v;
+    }, 60);
+    btn.textContent = '🔊';
+    muted = false;
+  } else {
+    audio.muted = true;
+    btn.textContent = '🔇';
+    muted = true;
   }
-
-  // When muted video plays (always allowed), try to start audio
-  vid.addEventListener('playing', function(){
-    setTimeout(startMusic, 200);
-  });
-
-  // Also try directly on load
-  window.addEventListener('load', function(){
-    setTimeout(startMusic, 500);
-  });
-
-  // Last resort: first interaction
-  var fn = function(){
-    startMusic();
-    document.removeEventListener('click', fn);
-    document.removeEventListener('touchstart', fn);
-  };
-  document.addEventListener('click', fn);
-  document.addEventListener('touchstart', fn);
-})();
+}
 </script>
+
+
 
 
 
