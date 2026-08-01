@@ -106,6 +106,69 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Raleway',sans-seri
 </style>
 </head>
 <body>
+<audio id="bgMusic" loop muted style="display:none"><source src="music.mp3" type="audio/mpeg"></audio>
+<script>
+(function(){
+  function fadeIn(audio){
+    audio.volume=0;
+    var v=0;
+    var t=setInterval(function(){v+=0.04;if(v>=0.8){v=0.8;clearInterval(t);}audio.volume=v;},80);
+  }
+
+  // METHOD 1: Web Audio API via fetch (bypasses autoplay on most browsers)
+  window.addEventListener('load', function(){
+    try{
+      var ctx = new (window.AudioContext||window.webkitAudioContext)();
+      fetch('music.mp3')
+        .then(function(r){return r.arrayBuffer();})
+        .then(function(buf){return ctx.decodeAudioData(buf);})
+        .then(function(decoded){
+          var gain = ctx.createGain();
+          gain.gain.setValueAtTime(0, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.8, ctx.currentTime+3);
+          gain.connect(ctx.destination);
+          var src = ctx.createBufferSource();
+          src.buffer = decoded;
+          src.loop = true;
+          src.connect(gain);
+          src.start(0);
+          console.log('Audio started via WebAudio API');
+        })
+        .catch(function(){ tryFallback(); });
+    } catch(e){ tryFallback(); }
+  });
+
+  // METHOD 2: muted play then unmute
+  function tryFallback(){
+    var a = document.getElementById('bgMusic');
+    a.muted = true;
+    var p = a.play();
+    if(p){
+      p.then(function(){
+        setTimeout(function(){
+          a.muted=false;
+          fadeIn(a);
+        },500);
+      }).catch(function(){ tryClick(); });
+    } else { tryClick(); }
+  }
+
+  // METHOD 3: first interaction (last resort)
+  function tryClick(){
+    var a = document.getElementById('bgMusic');
+    var fn = function(){
+      a.muted=false;
+      a.play().then(function(){fadeIn(a);});
+      document.removeEventListener('click',fn);
+      document.removeEventListener('touchstart',fn);
+    };
+    document.addEventListener('click',fn);
+    document.addEventListener('touchstart',fn);
+  }
+})();
+</script>
+
+
 
 <div id="bg"></div>
 
@@ -188,7 +251,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Raleway',sans-seri
 <div id="petals"></div>
 
 <script>
-const N=5, SHOW=3500, GAP=1200;
+const N=5, SHOW=4500, GAP=2000;
 let cur=-1, autoTimer=null, isAnim=false;
 
 spawnPetals(); setInterval(spawnPetals, 18000);
